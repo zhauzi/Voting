@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Web Voting</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.card {
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.name {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.vote-count {
+    font-size: 14px;
+    color: #555;
+    margin: 6px 0;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    background: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+button:hover {
+    transform: scale(1.04);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+button:disabled {
+    background: #ddd;
+    cursor: not-allowed;
+}
+
+.progress {
+    background: #eee;
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s;
+}
+
+.blue { background: #4da3ff; }
+.green { background: #4caf50; }
+.orange { background: #ff9800; }
+
+.bottom-btn {
+    margin-top: 25px;
+    background: #4da3ff;
+    color: white;
+    border: none;
+}
+
+/* Popup */
+.popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-box {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    text-align: center;
+    animation: pop 0.4s;
+}
+
+@keyframes pop {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Halaman hasil */
+#hasil {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="voting">
+    <h1>Voting Online</h1>
+
+    <div class="card">
+        <div class="name">Nama Kandidat 1</div>
+        <div class="vote-count">Vote: <span id="v1">0</span></div>
+        <button onclick="vote(1)">Vote</button>
+        <div class="progress">
+            <div class="progress-bar blue" id="p1"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="name">Nama Kandidat 2</div>
+        <div class="vote-count">Vote: <span id="v2">0</span></div>
+        <button onclick="vote(2)">Vote</button>
+        <div class="progress">
+            <div class="progress-bar green" id="p2"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="name">Nama Kandidat 3</div>
+        <div class="vote-count">Vote: <span id="v3">0</span></div>
+        <button onclick="vote(3)">Vote</button>
+        <div class="progress">
+            <div class="progress-bar orange" id="p3"></div>
+        </div>
+    </div>
+
+    <!-- TOMBOL HASIL -->
+    <button class="bottom-btn" onclick="bukaHasil()">
+        📊 Hasil Voting
+    </button>
+</div>
+
+<!-- HALAMAN HASIL -->
+<div class="container" id="hasil">
+    <h1>Hasil Voting</h1>
+
+    <p>Kandidat 1: <b id="hv1">0</b> vote</p>
+    <p>Kandidat 2: <b id="hv2">0</b> vote</p>
+    <p>Kandidat 3: <b id="hv3">0</b> vote</p>
+
+    <button onclick="kembali()">⬅ Kembali</button>
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+    <div class="popup-box">
+        <h2>Terima Kasih 🙏</h2>
+        <p>Sudah melakukan voting</p>
+    </div>
+</div>
+
+<script>
+let votes = JSON.parse(localStorage.getItem("votes")) || [0,0,0];
+
+function updateUI() {
+    let total = votes.reduce((a,b)=>a+b,0) || 1;
+
+    document.getElementById("v1").innerText = votes[0];
+    document.getElementById("v2").innerText = votes[1];
+    document.getElementById("v3").innerText = votes[2];
+
+    document.getElementById("p1").style.width = (votes[0]/total*100)+"%";
+    document.getElementById("p2").style.width = (votes[1]/total*100)+"%";
+    document.getElementById("p3").style.width = (votes[2]/total*100)+"%";
+
+    document.getElementById("hv1").innerText = votes[0];
+    document.getElementById("hv2").innerText = votes[1];
+    document.getElementById("hv3").innerText = votes[2];
+}
+
+updateUI();
+
+function vote(n) {
+    if (localStorage.getItem("sudahVote")) return;
+
+    votes[n-1]++;
+    localStorage.setItem("votes", JSON.stringify(votes));
+    localStorage.setItem("sudahVote", "true");
+
+    updateUI();
+    document.getElementById("popup").style.display="flex";
+    setTimeout(()=>document.getElementById("popup").style.display="none",2000);
+}
+
+function bukaHasil() {
+    document.getElementById("voting").style.display="none";
+    document.getElementById("hasil").style.display="block";
+}
+
+function kembali() {
+    document.getElementById("hasil").style.display="none";
+    document.getElementById("voting").style.display="block";
+}
+</script>
+
+</body>
+</html>
